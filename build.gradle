@@ -38,8 +38,10 @@ allprojects {
         jcenter()
     }
 	
-	 tasks.withType(Javadoc) {
-         options.addBooleanOption('Xdoclint:none', true)
-         options.addStringOption('encoding', 'UTF-8')
-     }
+	tasks.withType(Javadoc).all { enabled = false }
+	
+	// tasks.withType(Javadoc) {
+    //    options.addBooleanOption('Xdoclint:none', true)
+    //     options.addStringOption('encoding', 'UTF-8')
+    // }
 }
