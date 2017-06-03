@@ -20,7 +20,7 @@ class UploadTaskRequest(request: Request) : TaskRequest(request) {
     val boundary = request.httpHeaders["Content-Type"]?.split("=", limit = 2)?.get(1) ?: System.currentTimeMillis().toHexString()
 
     var progressCallback: ((Long, Long) -> Unit)? = null
-    lateinit var sourceCallback: (Request, URL) -> Iterable<File>
+    lateinit var sourceCallback: (Request, URL) -> Iterable<Pair<InputStream, String>>
 
     var dataStream: ByteArrayOutputStream? = null
 
@@ -35,16 +35,16 @@ class UploadTaskRequest(request: Request) : TaskRequest(request) {
 
                     write("--$boundary")
                     write(CRLF)
-                    write("Content-Disposition: form-data; name=\"$fileName\"; filename=\"${file.name}\"")
+                    write("Content-Disposition: form-data; name=\"$fileName\"; filename=\"${file.second}\"")
                     write(CRLF)
                     write("Content-Type: " + request.mediaTypes.getOrElse(i) { guessContentType(file) })
                     write(CRLF)
                     write(CRLF)
 
                     //input file data
-                    FileInputStream(file).use {
+                    file.first.use {
                         it.copyTo(this, BUFFER_SIZE) { writtenBytes ->
-                            progressCallback?.invoke(writtenBytes, file.length())
+                            {}
                         }
                     }
 
