@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
+import com.example.fuel.R.id.mainAuxText
 import com.github.kittinunf.fuel.Fuel
 import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.fuel.core.FuelManager
@@ -20,6 +21,8 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_main.*
 import java.io.File
+import java.io.FileInputStream
+import java.io.InputStream
 import java.io.Reader
 
 class MainActivity : AppCompatActivity() {
@@ -144,7 +147,7 @@ class MainActivity : AppCompatActivity() {
 
     fun httpUpload() {
         Fuel.upload("/post").source { request, url ->
-            File(filesDir, "test.tmp")
+                Pair<InputStream, String>(FileInputStream(File(filesDir, "test.tmp")), "test.tmp")
         }.progress { writtenBytes, totalBytes ->
             Log.v(TAG, "Upload: ${writtenBytes.toFloat() / totalBytes.toFloat()}")
         }.responseString { request, response, result ->

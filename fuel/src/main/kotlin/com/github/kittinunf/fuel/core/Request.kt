@@ -9,6 +9,7 @@ import com.github.kittinunf.fuel.core.requests.UploadTaskRequest
 import com.github.kittinunf.fuel.util.Base64
 import com.github.kittinunf.result.Result
 import java.io.File
+import java.io.InputStream
 import java.net.URL
 import java.nio.charset.Charset
 import java.util.concurrent.Callable
@@ -155,7 +156,7 @@ class Request : Fuel.RequestConvertible {
         return this
     }
 
-    fun sources(sources: (Request, URL) -> Iterable<File>): Request {
+    fun sources(sources: (Request, URL) -> Iterable<Pair<InputStream, String>>): Request {
         mediaTypes.clear()
         names.clear()
 
@@ -167,7 +168,7 @@ class Request : Fuel.RequestConvertible {
         return this
     }
 
-    fun source(source: (Request, URL) -> File): Request {
+    fun source(source: (Request, URL) -> Pair<InputStream, String>): Request {
         sources { request, url ->
             listOf(source.invoke(request, request.url))
         }
