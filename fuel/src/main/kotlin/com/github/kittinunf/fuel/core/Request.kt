@@ -9,6 +9,7 @@ import com.github.kittinunf.fuel.core.requests.UploadTaskRequest
 import com.github.kittinunf.fuel.util.Base64
 import com.github.kittinunf.result.Result
 import java.io.File
+import java.io.InputStream
 import java.net.URL
 import java.nio.charset.Charset
 import java.util.concurrent.Callable

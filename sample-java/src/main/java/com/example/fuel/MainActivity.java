@@ -17,6 +17,9 @@ import com.github.kittinunf.fuel.core.Response;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -138,13 +141,20 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
 
-                Fuel.upload("http://httpbin.org/post").source(new Function2<Request, URL, File>() {
+                Fuel.upload("http://httpbin.org/post").source(new Function2<Request, URL, Pair<InputStream, String>>() {
                     @Override
-                    public File invoke(Request request, URL url) {
+                    public Pair<InputStream, String> invoke(Request request, URL url) {
                         File sd = Environment.getExternalStorageDirectory();
                         File location = new File(sd.getAbsolutePath() + "/test");
                         location.mkdir();
-                        return new File(location, "test-java.tmp");
+                        File file = new File(location, "test-java.tmp");
+                        FileInputStream fis = null;
+                        try {
+                            fis = new FileInputStream(file);
+                        } catch (FileNotFoundException e) {
+                            e.printStackTrace();
+                        }
+                        return new Pair<InputStream, String>(fis, "test-java.tmp");
                     }
                 }).responseString(new Handler<String>() {
                     @Override
