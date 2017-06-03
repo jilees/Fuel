@@ -9,6 +9,11 @@ repositories {
     jcenter()
 }
 
+tasks.withType(Javadoc) {
+         options.addStringOption('Xdoclint:none', '-quiet')
+         options.addStringOption('encoding', 'UTF-8')
+     }
+
 android {
     compileSdkVersion parent.ext.compile_sdk_version
     buildToolsVersion parent.ext.build_tool_version
@@ -16,7 +21,7 @@ android {
     defaultConfig {
         minSdkVersion 9
         targetSdkVersion parent.ext.compile_sdk_version
-        versionCode 1
+        versionCode 2
         versionName parent.ext.publish_version
     }
 
