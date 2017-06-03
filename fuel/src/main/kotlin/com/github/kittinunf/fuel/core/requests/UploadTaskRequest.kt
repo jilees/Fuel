@@ -4,10 +4,7 @@ import com.github.kittinunf.fuel.core.Request
 import com.github.kittinunf.fuel.core.Response
 import com.github.kittinunf.fuel.util.copyTo
 import com.github.kittinunf.fuel.util.toHexString
-import java.io.ByteArrayOutputStream
-import java.io.File
-import java.io.FileInputStream
-import java.io.OutputStream
+import java.io.*
 import java.net.URL
 import java.net.URLConnection
 import javax.activation.MimetypesFileTypeMap
@@ -20,7 +17,7 @@ class UploadTaskRequest(request: Request) : TaskRequest(request) {
     val boundary = request.httpHeaders["Content-Type"]?.split("=", limit = 2)?.get(1) ?: System.currentTimeMillis().toHexString()
 
     var progressCallback: ((Long, Long) -> Unit)? = null
-    lateinit var sourceCallback: (Request, URL) -> Iterable<File>
+    lateinit var sourceCallback: (Request, URL) -> Iterable<Pair<InputStream, String>>
 
     var dataStream: ByteArrayOutputStream? = null
 
@@ -35,16 +32,16 @@ class UploadTaskRequest(request: Request) : TaskRequest(request) {
 
                     write("--$boundary")
                     write(CRLF)
-                    write("Content-Disposition: form-data; name=\"$fileName\"; filename=\"${file.name}\"")
+                    write("Content-Disposition: form-data; name=\"$fileName\"; filename=\"${file.second}\"")
                     write(CRLF)
-                    write("Content-Type: " + request.mediaTypes.getOrElse(i) { guessContentType(file) })
+                    write("Content-Type: " + request.mediaTypes.getOrElse(i) { guessContentType(file.second) })
                     write(CRLF)
                     write(CRLF)
 
                     //input file data
-                    FileInputStream(file).use {
+                    file.first.use {
                         it.copyTo(this, BUFFER_SIZE) { writtenBytes ->
-                            progressCallback?.invoke(writtenBytes, file.length())
+                            progressCallback?.invoke(writtenBytes, file.first.available().toLong())
                         }
                     }
 
@@ -75,9 +72,13 @@ class UploadTaskRequest(request: Request) : TaskRequest(request) {
         }
     }
 
-    private fun guessContentType(file: File): String {
-        return URLConnection.guessContentTypeFromName(file.name) ?: MimetypesFileTypeMap().getContentType(file)
+    private fun guessContentType(fileName: String): String {
+        return URLConnection.guessContentTypeFromName(fileName) ?: MimetypesFileTypeMap().getContentType(fileName)
+    }
+
+    companion object{
+        fun OutputStream.write(str: String) = write(str.toByteArray())
     }
 }
 
-fun OutputStream.write(str: String) = write(str.toByteArray())
+

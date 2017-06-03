@@ -9,6 +9,8 @@ import com.github.kittinunf.fuel.core.requests.UploadTaskRequest
 import com.github.kittinunf.fuel.util.Base64
 import com.github.kittinunf.result.Result
 import java.io.File
+import java.io.FileInputStream
+import java.io.InputStream
 import java.net.URL
 import java.nio.charset.Charset
 import java.util.concurrent.Callable
@@ -155,7 +157,39 @@ class Request : Fuel.RequestConvertible {
         return this
     }
 
+    //TODO: бережно сохранить
     fun sources(sources: (Request, URL) -> Iterable<File>): Request {
+        mediaTypes.clear()
+        names.clear()
+
+        val uploadTaskRequest = taskRequest as? UploadTaskRequest ?: throw IllegalStateException("source is only used with RequestType.UPLOAD")
+
+        uploadTaskRequest.apply {
+            sourceCallback = fun(Request, URL): Iterable<Pair<InputStream, String>> {
+                return sources(Request, URL).map {
+                    Pair(FileInputStream(it), it.name)
+                }
+            }
+        }
+        return this
+    }
+
+    //TODO: бережно сохранить
+    fun source(source: (Request, URL) -> File): Request {
+        sources { request, url ->
+            listOf(source.invoke(request, request.url))
+        }
+        return this
+    }
+
+    fun sourceAsStream(source: (Request, URL) -> Pair<InputStream, String>): Request {
+        sourcesAsStream { request, url ->
+            listOf(source.invoke(request, request.url))
+        }
+        return this
+    }
+
+    fun sourcesAsStream(sources: (Request, URL) -> Iterable<Pair<InputStream, String>>): Request {
         mediaTypes.clear()
         names.clear()
 
@@ -165,13 +199,6 @@ class Request : Fuel.RequestConvertible {
             sourceCallback = sources
         }
         return this
-    }
-
-    fun source(source: (Request, URL) -> File): Request {
-        sources { request, url ->
-            listOf(source.invoke(request, request.url))
-        }
-
         return this
     }
 
