@@ -6,7 +6,7 @@ import com.github.kittinunf.fuel.util.copyTo
 import com.github.kittinunf.fuel.util.toHexString
 import java.io.ByteArrayOutputStream
 import java.io.File
-import java.io.FileInputStream
+import java.io.InputStream
 import java.io.OutputStream
 import java.net.URL
 import java.net.URLConnection
@@ -37,7 +37,7 @@ class UploadTaskRequest(request: Request) : TaskRequest(request) {
                     write(CRLF)
                     write("Content-Disposition: form-data; name=\"$fileName\"; filename=\"${file.second}\"")
                     write(CRLF)
-                    write("Content-Type: " + request.mediaTypes.getOrElse(i) { guessContentType(file) })
+                    write("Content-Type: " + request.mediaTypes.getOrElse(i) { guessContentType(file.second) })
                     write(CRLF)
                     write(CRLF)
 
@@ -75,8 +75,8 @@ class UploadTaskRequest(request: Request) : TaskRequest(request) {
         }
     }
 
-    private fun guessContentType(file: File): String {
-        return URLConnection.guessContentTypeFromName(file.name) ?: MimetypesFileTypeMap().getContentType(file)
+    private fun guessContentType(fileName: String): String {
+        return URLConnection.guessContentTypeFromName(fileName) ?: "multipart/form-data"
     }
 }
 

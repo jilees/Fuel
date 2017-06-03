@@ -155,7 +155,7 @@ class Request : Fuel.RequestConvertible {
         return this
     }
 
-    fun sources(sources: (Request, URL) -> Iterable<File>): Request {
+    fun sources(sources: (Request, URL) -> Iterable<Pair<InputStream, String>>): Request {
         mediaTypes.clear()
         names.clear()
 
@@ -167,7 +167,7 @@ class Request : Fuel.RequestConvertible {
         return this
     }
 
-    fun source(source: (Request, URL) -> File): Request {
+    fun source(source: (Request, URL) -> Pair<InputStream, String>): Request {
         sources { request, url ->
             listOf(source.invoke(request, request.url))
         }
